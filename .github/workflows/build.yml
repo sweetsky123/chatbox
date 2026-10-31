@@ -42,6 +42,8 @@ jobs:
   build-windows:
     runs-on: windows-latest
     needs: unit-tests
+    env:
+      UPDATE_CHANNEL: alpha
     steps:
       - uses: actions/checkout@v4
         with:
@@ -109,6 +111,7 @@ jobs:
     runs-on: macos-latest
     needs: unit-tests
     env:
+      UPDATE_CHANNEL: alpha
       # Multi-arch packaging with hard links corrupts already-sealed files
       # (see docs/technical/build-and-deployment.md).
       USE_HARD_LINKS: 'false'
@@ -159,6 +162,8 @@ jobs:
   build-linux:
     runs-on: ubuntu-latest
     needs: unit-tests
+    env:
+      UPDATE_CHANNEL: alpha
     steps:
       - uses: actions/checkout@v4
         with:
@@ -207,6 +212,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: unit-tests
     env:
+      UPDATE_CHANNEL: alpha
       CHATBOX_BUILD_TARGET: mobile_app
       CHATBOX_BUILD_PLATFORM: android
       CHATBOX_TAG: ${{ inputs.tag }}

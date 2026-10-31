@@ -58,6 +58,11 @@ function readProjectNpmrc(projectDir) {
   return fs.readFileSync(path.join(projectDir, '.npmrc'), 'utf8')
 }
 
+function pnpmLockHasReleaseAppImporter() {
+  const lock = fs.readFileSync(path.join(__dirname, '..', '..', 'pnpm-lock.yaml'), 'utf8')
+  return /^  release\/app:/m.test(lock)
+}
+
 function getProjectRegistry(projectDir, options = {}) {
   const readNpmrc = options.readNpmrc || readProjectNpmrc
   let registry = ''
@@ -131,9 +136,17 @@ function verifyVersionsMatchPnpmWorkspace(appDir, options = {}) {
   walk(Array.isArray(pnpmList) ? pnpmList[0] : pnpmList)
 
   if (pnpmVersions.size === 0) {
-    // Fail closed: an empty tree means the check saw nothing to compare, which
-    // would silently report every skew as verified. Better to fail the build
-    // than to ship a package with missing runtime dependencies again.
+    // The public source drop does not include release/app in the pnpm
+    // workspace (no `release/app:` importer in pnpm-lock.yaml), so pnpm has
+    // nothing to compare against. npm ci above is then the sole authority for
+    // release/app dependencies. Fail closed only when the importer exists but
+    // resolves to nothing — that is genuine breakage.
+    if (!pnpmLockHasReleaseAppImporter()) {
+      console.log(
+        '[ensure-app-deps] release/app is not part of the pnpm workspace; skipping pnpm alignment check (npm package-lock.json is authoritative).',
+      )
+      return
+    }
     throw new Error(
       '[ensure-app-deps] pnpm list returned no production dependencies — cannot verify version alignment with the pnpm workspace lockfile. ' +
         'Run `pnpm list --prod --json --lockfile-only` in release/app/ to debug.',
