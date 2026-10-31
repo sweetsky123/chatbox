@@ -169,13 +169,18 @@ describe('Mobile Agent Mode capabilities', () => {
     expect(screen.queryByRole('switch', { name: 'Health (read only)' })).not.toBeInTheDocument()
     expect(screen.getByRole('switch', { name: 'Photos' })).not.toBeDisabled()
   })
-  test('locks mode after a user message and locks capabilities while generation runs', () => {
+  test('locks capabilities while generation runs', () => {
     mocks.session.messages = [{ id: 'user', role: 'user', contentParts: [{ type: 'text', text: 'hello' }] }]
     mocks.active = true
     renderPanel('existing')
     expect(screen.getByRole('button', { name: 'Chat Mode' })).toBeDisabled()
     fireEvent.click(screen.getByRole('button', { name: 'Device services' }))
     expect(screen.getByRole('switch', { name: 'Calendar' })).toBeDisabled()
+  })
+  test('allows changing modes again once generation settles', () => {
+    mocks.session.messages = [{ id: 'user', role: 'user', contentParts: [{ type: 'text', text: 'hello' }] }]
+    renderPanel('existing')
+    expect(screen.getByRole('button', { name: 'Chat Mode' })).toBeEnabled()
   })
   test('keeps the current mode visibly selected while generation runs', () => {
     mocks.active = true

@@ -1,4 +1,3 @@
-import { resolveSessionMode } from '@chatbox/core/session/mode-policy'
 import {
   ActionIcon,
   Badge,
@@ -574,20 +573,13 @@ const AgentModePanel = forwardRef<AgentModePanelHandle, AgentModePanelProps>(fun
   // runs for a newly opened page we fall back to the anchor-based placement.
   const resolvedSubPanelPosition = subPanelPosition?.page === page ? subPanelPosition : null
 
-  // Manual cross-mode switching (chat ↔ work) is only offered before the
-  // conversation starts — mirroring the work-side `entry.locked` in the other
-  // direction. Same-mode toggles are unaffected; the store enforces the same
-  // rule in setSessionAgentMode.
-  const conversationStarted = (headerRead?.summary.userMessageCount ?? 0) > 0
-
   // --- Mode button ---
   const ModeButton: FC<{ value: Extract<AgentModeValue, 'on' | 'off'>; label: string }> = ({ value, label }) => {
     const isActive = agentModeUIState.displayValue === value
     const isLockedDisabled = entry.locked && value !== 'on'
-    const isSwitchFrozen = conversationStarted && resolveSessionMode(value) !== resolveSessionMode(entry.value)
     const isPlatformUnsupported = !platform.isDesktopLike && value === 'on'
     const isModelDisabled = !isPlatformUnsupported && !modelSupportsAgentMode && value !== 'off'
-    const isDisabled = !isPlatformUnsupported && (isLockedDisabled || isSwitchFrozen || isModelDisabled)
+    const isDisabled = !isPlatformUnsupported && (isLockedDisabled || isModelDisabled)
     const tooltipLabel = isPlatformUnsupported
       ? t('Work Mode is currently only available on the desktop app.')
       : isModelDisabled

@@ -80,7 +80,7 @@
 ### 阶段二：模式策略与切换收口
 
 - 新增 mode-policy 模块（见上节）。
-- **模式切换冻结**：`setSessionAgentMode` 增加 `source` 参数；会话产生首条用户消息后，`'user'` 来源的跨模式切换（`'on'` ↔ 非 `'on'`）被拒绝。智能切换建议的 accept（`lockSessionAgentMode`）与 decline（`'auto'→'off'`，source `'suggestion'`）不受影响；`'auto'` ↔ `'off'` 属聊天模式内部偏好，本就由智能切换开关的过期逻辑（首条消息后禁用）覆盖。
+- **模式切换冻结**（fork 已移除）：上游曾在 `setSessionAgentMode` 用 `source` 参数拒绝会话产生首条用户消息后的 `'user'` 来源跨模式切换；fork 恢复用户自主选择权，任意时刻允许手动跨模式切换，`source` 参数随之删除。工作模式侧的 `AgentModeEntry.locked`（首条工作模式消息后锁死）仍保留。
 - 模式面板两个方向对称锁定：工作→聊天沿用 `entry.locked`；聊天→工作在会话开始后禁用按钮，tooltip 复用既有文案（"Locked after the chat starts… start a new chat to change"）。
 - 工作模式消息限制落在 UI 入口（隐藏）+ store 后备：助手消息可编辑，多 step 回复只改最后一段输出文本（工具调用与中间步骤文本保持不变）；用户消息编辑弹窗仅 Save & Resend（隐藏"仅保存"、锁定角色选择器）；在下方回答入口移除；ForkGroup 删除分支入口移除；单条消息删除与最新压缩摘要的编辑/删除保留。对话已有可缓存前缀（压缩摘要、工具历史，或可见正文达到 `PROMPT_CACHE_CONFIRM_MIN_CHARS`）时，删除历史消息与切换模型会弹出说明缓存失效的二次确认；判定看当前选中的 provider 上下文（压缩点、上下文条数、进行中请求的前缀），删掉不在该上下文里或删完上下文不变的消息不弹。不再提示按场景记在 `uiStore`（删除历史消息 / 切换模型 / 删除摘要），互不影响。新话题入口隐藏（store 侧 `refreshContextAndCreateNewThread` 做后备拦截并覆盖快捷键路径，模式经 `getSessionAgentModeEntry` 规范解析以兼容 legacy map 会话）；话题历史在会话没有归档话题时隐藏，已有归档话题时保留消息流分隔与历史入口，避免把多个话题误呈现成一段连续对话；上下文压缩归档不受影响。
 - 存量已混用模式的会话不迁移，策略从更新后开始生效。

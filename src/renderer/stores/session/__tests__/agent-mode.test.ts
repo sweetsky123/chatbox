@@ -122,7 +122,7 @@ describe('setSessionAgentMode', () => {
     })
   })
 
-  test('uses the latest queued session state when checking locks', async () => {
+  test('refuses to leave a locked work session even when the initial read is stale', async () => {
     getSessionMock.mockResolvedValueOnce({
       id: 'session-race',
       name: 'Test',
@@ -136,10 +136,9 @@ describe('setSessionAgentMode', () => {
       settings: { agentMode: { value: 'on', locked: true, lockReason: 'message_sent' } },
     })
 
-    await expect(setSessionAgentMode('session-race', 'off')).rejects.toThrow(
-      'Conversation changed while choosing its mode'
-    )
+    const entry = await setSessionAgentMode('session-race', 'off')
 
+    expect(entry).toEqual({ value: 'on', locked: true, lockReason: 'message_sent' })
     expect(sessionsById.get('session-race')?.settings?.agentMode).toEqual({
       value: 'on',
       locked: true,

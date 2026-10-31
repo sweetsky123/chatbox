@@ -327,7 +327,7 @@ const _Message: FC<Props> = (props) => {
     agentModeSuggestionHandledRef.current = true
     trackAgentModeSuggestionActionAsync('decline')
     try {
-      await setSessionAgentMode(sessionId, 'off', { source: 'system' })
+      await setSessionAgentMode(sessionId, 'off')
       const nextMsg = resetMessageForAgentModeResponse(msg)
       await modifyMessage(sessionId, nextMsg, true)
       await generate(sessionId, nextMsg, { operationType: 'send_message', skipAgentModeSuggestion: true })

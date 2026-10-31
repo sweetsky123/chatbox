@@ -350,7 +350,7 @@ const dependencies: GenerationServiceDependencies<ModelDependencies> = {
     getWebBrowsing: (sessionId, provider) => getSessionWebBrowsing(sessionId, provider),
     getAgentModeEntry: (sessionId, session) => getSessionAgentModeEntry(sessionId, session),
     async setAgentMode(sessionId, value) {
-      await setSessionAgentMode(sessionId, value, { source: 'system' })
+      await setSessionAgentMode(sessionId, value)
     },
     async lockAgentMode(sessionId, reason) {
       await lockSessionAgentMode(sessionId, reason)

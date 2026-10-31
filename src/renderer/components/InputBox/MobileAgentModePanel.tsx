@@ -236,7 +236,7 @@ const MobileAgentModePanel = forwardRef<AgentModePanelHandle, AgentModePanelProp
             loading ||
             (mode === 'on' && !modelSupportsAgentMode) ||
             (entry.locked && mode !== 'on') ||
-            Boolean((conversationStarted || hasDraftAttachments) && !isCurrent)
+            Boolean(hasDraftAttachments && !isCurrent)
           return (
             <Button
               key={mode}
@@ -262,7 +262,7 @@ const MobileAgentModePanel = forwardRef<AgentModePanelHandle, AgentModePanelProp
           {t('Remove attachments before changing modes.')}
         </Text>
       )}
-      {(conversationStarted || entry.locked) && (
+      {entry.locked && (
         <Text size="xs" c="dimmed">
           {t('Locked after the chat starts to keep tools and context consistent — start a new chat to change')}
         </Text>

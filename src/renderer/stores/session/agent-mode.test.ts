@@ -40,7 +40,7 @@ async function seed(value: Session) {
   await repository.seedSession(value)
 }
 
-describe('setSessionAgentMode cross-mode freeze', () => {
+describe('setSessionAgentMode', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     repository = new InMemorySessionRepository()
@@ -72,18 +72,19 @@ describe('setSessionAgentMode cross-mode freeze', () => {
     }
   )
 
-  it('refuses a manual chat→work switch once the conversation has started', async () => {
+  it('allows a manual chat→work switch after the conversation has started', async () => {
     await seed(
       session({ messages: [userMsg], settings: { agentMode: { value: 'off', locked: false, lockReason: null } } })
     )
 
     const entry = await setSessionAgentMode('session-1', 'on')
 
-    expect(entry.value).toBe('off')
-    expect(updateSessionMock).not.toHaveBeenCalled()
+    expect(entry.value).toBe('on')
+    expect(updateSessionMock).toHaveBeenCalled()
+    expect((await repository.getSessionHeader('session-1'))?.header.settings?.agentMode?.value).toBe('on')
   })
 
-  it('still allows manual cross-mode switching before the first user message', async () => {
+  it('allows manual cross-mode switching before the first user message', async () => {
     await seed(session({ messages: [], settings: { agentMode: { value: 'off', locked: false, lockReason: null } } }))
 
     await setSessionAgentMode('session-1', 'on')
@@ -91,27 +92,7 @@ describe('setSessionAgentMode cross-mode freeze', () => {
     expect(updateSessionMock).toHaveBeenCalled()
   })
 
-  it('lets system-source resolution cross modes mid-conversation (suggestion decline)', async () => {
-    await seed(
-      session({ messages: [userMsg], settings: { agentMode: { value: 'auto', locked: false, lockReason: null } } })
-    )
-
-    await setSessionAgentMode('session-1', 'off', { source: 'system' })
-
-    expect(updateSessionMock).toHaveBeenCalled()
-  })
-
-  it('treats auto ↔ off as a chat-internal toggle, not a mode change', async () => {
-    await seed(
-      session({ messages: [userMsg], settings: { agentMode: { value: 'auto', locked: false, lockReason: null } } })
-    )
-
-    await setSessionAgentMode('session-1', 'off')
-
-    expect(updateSessionMock).toHaveBeenCalled()
-  })
-
-  it('keeps the locked work session refusal ahead of the freeze rule', async () => {
+  it('keeps refusing to leave a locked work session', async () => {
     await seed(
       session({
         messages: [userMsg],

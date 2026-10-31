@@ -1,4 +1,3 @@
-import { resolveSessionMode } from '@chatbox/core/session/mode-policy'
 import type {
   AgentModeEntry,
   AgentModeLockReason,
@@ -153,17 +152,7 @@ export function persistSessionPromptContextSnapshotGuarded(
   void rendererApplication.sessions.updateSessionHeader(sessionId, (current) => applySnapshot(current))
 }
 
-export type SetAgentModeSource =
-  /** An explicit user choice in the mode panel. */
-  | 'user'
-  /** Suggestion resolution and other generation-flow adjustments. */
-  | 'system'
-
-export async function setSessionAgentMode(
-  sessionId: string,
-  value: AgentModeValue,
-  options: { source?: SetAgentModeSource } = {}
-): Promise<AgentModeEntry> {
+export async function setSessionAgentMode(sessionId: string, value: AgentModeValue): Promise<AgentModeEntry> {
   if (sessionId === 'new') {
     return setNewSessionAgentMode(value)
   }
@@ -176,20 +165,6 @@ export async function setSessionAgentMode(
 
   let next = getSessionAgentModeEntry(sessionId, session)
   if (next.locked && value !== 'on') return next
-  // Manual cross-mode switching is only offered before the conversation
-  // starts; afterwards the modes have diverged too far (structural freedom vs
-  // queue/steering) to swap in place — the user starts a new chat instead.
-  // Smart-switching resolution ('system') is exempt, and 'auto' ↔ 'off' is a
-  // chat-internal preference, not a mode change.
-  if ((options.source ?? 'user') === 'user' && resolveSessionMode(value) !== resolveSessionMode(next.value)) {
-    let cursor: import('@chatbox/core/ports').SessionThreadPageCursor | undefined
-    do {
-      const page = await rendererApplication.sessions.readSessionThreadSummariesPage({ sessionId, limit: 64, cursor })
-      if (!page || page.revision !== source.revision) throw new Error('Conversation changed while choosing its mode')
-      if (page.threads.some((thread) => (thread.summary?.userMessageCount ?? 0) > 0)) return next
-      cursor = page.nextCursor ?? undefined
-    } while (cursor)
-  }
 
   await rendererApplication.sessions.updateSessionHeader(
     sessionId,
