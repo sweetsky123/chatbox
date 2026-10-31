@@ -1,0 +1,265 @@
+name: Build Release
+
+# Manual build: enter an existing git tag (e.g. v1.24.0) and every platform
+# artifact for that tag is built, smoke-tested, and attached to a release.
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to build (e.g. v1.24.0) — must already exist'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  # Compile-time gate: the exact source being built must pass the unit suite.
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag }}
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Generate mobile worker and routes
+        run: |
+          node scripts/build-mobile-work-worker.cjs
+          node scripts/generate-routes.mjs
+      - name: Unit tests
+        run: pnpm test:unit
+
+  build-windows:
+    runs-on: windows-latest
+    needs: unit-tests
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag }}
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Generate mobile worker and routes
+        run: |
+          node scripts/build-mobile-work-worker.cjs
+          node scripts/generate-routes.mjs
+      - name: Sync app version with tag
+        run: node scripts/sync-version.cjs "${{ inputs.tag }}"
+      - name: Build renderer, preload, and main
+        run: pnpm run build
+      - name: Package NSIS installers (x64 + arm64)
+        shell: cmd
+        run: pnpm exec electron-builder build --win nsis --x64 --arm64 --publish never -c.win.artifactName="Chatbox-${version}-Setup-${arch}.${ext}"
+      - name: Package portable executables (x64 + arm64)
+        shell: cmd
+        run: pnpm exec electron-builder build --win portable --x64 --arm64 --publish never -c.win.artifactName="Chatbox-${version}-${arch}-Portable.${ext}"
+      - name: Package portable directory zips (x64 + arm64)
+        shell: cmd
+        run: pnpm exec electron-builder build --win zip --x64 --arm64 --publish never -c.win.artifactName="Chatbox-${version}-${arch}-portable-zip.${ext}"
+      - name: Smoke test the x64 portable directory
+        shell: pwsh
+        run: |
+          $zip = Get-ChildItem 'release/build' -Filter 'Chatbox-*-x64-portable-zip.zip' | Select-Object -First 1
+          if (-not $zip) { throw 'x64 portable zip not found' }
+          Expand-Archive $zip.FullName -DestinationPath smoke
+          $exe = Get-ChildItem smoke -Recurse -Filter 'Chatbox.exe' |
+            Where-Object { $_.FullName -notmatch '\\resources\\' } |
+            Select-Object -First 1
+          if (-not $exe) { throw 'Chatbox.exe not found in the portable zip' }
+          $p = Start-Process -FilePath $exe.FullName -PassThru
+          Start-Sleep -Seconds 25
+          if ($p.HasExited) { throw "Chatbox exited early with code $($p.ExitCode)" }
+          Write-Host 'Chatbox.exe stayed alive for 25s — smoke test passed'
+          Stop-Process -Id $p.Id -Force
+      - name: Verify the arm64 archive contents
+        shell: pwsh
+        run: |
+          $zip = Get-ChildItem 'release/build' -Filter 'Chatbox-*-arm64-portable-zip.zip' | Select-Object -First 1
+          if (-not $zip) { throw 'arm64 portable zip not found' }
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          $names = [IO.Compression.ZipFile]::OpenRead($zip.FullName).Entries.FullName
+          if (-not ($names | Where-Object { $_ -match '(^|/)Chatbox\.exe$' })) { throw 'arm64 zip is missing Chatbox.exe' }
+          if (-not ($names | Where-Object { $_ -match '(^|/)app\.asar$' })) { throw 'arm64 zip is missing app.asar' }
+          Write-Host 'arm64 portable zip contains the expected app files'
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          path: |
+            release/build/Chatbox-*-Setup-*.exe
+            release/build/Chatbox-*-Portable-*.exe
+            release/build/Chatbox-*-portable-zip-*.zip
+          if-no-files-found: error
+
+  build-macos:
+    runs-on: macos-latest
+    needs: unit-tests
+    env:
+      # Multi-arch packaging with hard links corrupts already-sealed files
+      # (see docs/technical/build-and-deployment.md).
+      USE_HARD_LINKS: 'false'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag }}
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Generate mobile worker and routes
+        run: |
+          node scripts/build-mobile-work-worker.cjs
+          node scripts/generate-routes.mjs
+      - name: Sync app version with tag
+        run: node scripts/sync-version.cjs "${{ inputs.tag }}"
+      - name: Build renderer, preload, and main
+        run: pnpm run build
+      - name: Package dmg images (arm64 + x64)
+        run: pnpm exec electron-builder build --mac --publish never
+      - name: Smoke test the arm64 app
+        run: |
+          dmg=$(ls release/build/Chatbox-*-arm64.dmg | head -n 1)
+          hdiutil attach -nobrowse -readonly "$dmg"
+          volume=$(ls /Volumes | grep -i chatbox | head -n 1)
+          "/Volumes/$volume/Chatbox.app/Contents/MacOS/Chatbox" &
+          app_pid=$!
+          sleep 25
+          if ! kill -0 "$app_pid" 2>/dev/null; then
+            echo 'Chatbox.app exited early' >&2
+            hdiutil detach "/Volumes/$volume" || true
+            exit 1
+          fi
+          echo 'Chatbox.app stayed alive for 25s — smoke test passed'
+          kill "$app_pid" 2>/dev/null || true
+          hdiutil detach "/Volumes/$volume"
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos
+          path: release/build/Chatbox-*.dmg
+          if-no-files-found: error
+
+  build-linux:
+    runs-on: ubuntu-latest
+    needs: unit-tests
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag }}
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Generate mobile worker and routes
+        run: |
+          node scripts/build-mobile-work-worker.cjs
+          node scripts/generate-routes.mjs
+      - name: Sync app version with tag
+        run: node scripts/sync-version.cjs "${{ inputs.tag }}"
+      - name: Build renderer, preload, and main
+        run: pnpm run build
+      - name: Package AppImage and deb (x64 + arm64)
+        run: pnpm exec electron-builder build --linux --publish never
+      - name: Smoke test the x64 AppImage
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libfuse2 xvfb
+          appimage=$(ls release/build/Chatbox-*-x64.AppImage | head -n 1)
+          chmod +x "$appimage"
+          APPIMAGE_EXTRACT_AND_RUN=1 xvfb-run -a "$appimage" --no-sandbox &
+          sleep 25
+          if ! pgrep -f 'Chatbox.*--no-sandbox' > /dev/null; then
+            echo 'AppImage exited early' >&2
+            exit 1
+          fi
+          echo 'AppImage stayed alive for 25s — smoke test passed'
+          pkill -f 'Chatbox.*--no-sandbox' || true
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux
+          path: |
+            release/build/Chatbox-*.AppImage
+            release/build/Chatbox-*.deb
+          if-no-files-found: error
+
+  build-android:
+    runs-on: ubuntu-latest
+    needs: unit-tests
+    env:
+      CHATBOX_BUILD_TARGET: mobile_app
+      CHATBOX_BUILD_PLATFORM: android
+      CHATBOX_TAG: ${{ inputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag }}
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Generate mobile worker and routes
+        run: |
+          node scripts/build-mobile-work-worker.cjs
+          node scripts/generate-routes.mjs
+      - name: Sync app version with tag
+        run: node scripts/sync-version.cjs "${{ inputs.tag }}"
+      - name: Build the mobile renderer bundle
+        run: pnpm run build:renderer
+      - name: Ensure Android SDK packages
+        run: |
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null 2>&1 || true
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-35" "build-tools;35.0.0" > /dev/null
+      - name: Scaffold, patch, and build the Android app
+        run: node scripts/build-android.cjs
+      - name: Smoke test the APKs
+        run: node scripts/test-android-apks.cjs
+      - name: Collect renamed APKs
+        run: node scripts/collect-android-apks.cjs
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: android
+          path: release/build/android/*.apk
+          if-no-files-found: error
+
+  release:
+    runs-on: ubuntu-latest
+    needs: [build-windows, build-macos, build-linux, build-android]
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+      - name: Attach artifacts to the release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.tag }}
+          files: dist/**/*
+          generate_release_notes: true

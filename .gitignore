@@ -208,3 +208,7 @@ tmp_*.*
 # Local headless evaluation artifacts
 /jobs/
 /scripts/terminal_bench/__pycache__/
+
+# Capacitor native projects are scaffolded at build time (scripts/build-android.cjs)
+android/
+ios/
