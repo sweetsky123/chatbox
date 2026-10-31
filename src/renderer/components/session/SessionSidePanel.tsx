@@ -470,7 +470,7 @@ function OpenSessionPanel({
             <ThreadHistoryList session={session} />
           ) : (
             <SettingsDensityProvider density="compact">
-              <SessionSettingsContent session={session} mode={mode} onEdit={onEdit} />
+              <SessionSettingsContent session={session} onEdit={onEdit} />
             </SettingsDensityProvider>
           )}
         </div>

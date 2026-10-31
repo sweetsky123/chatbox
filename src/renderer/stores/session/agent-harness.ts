@@ -25,7 +25,7 @@ import type {
 } from '@shared/types'
 import type { ModelDependencies } from '@shared/types/adapters'
 import { combineMemoryStateTokens } from '@shared/types/agent-persona'
-import { sequenceMessages } from '@shared/utils/message'
+import { getMessageText, sequenceMessages } from '@shared/utils/message'
 import {
   resolveReasoningReplayPolicy,
   shouldDisableClaudeThinkingForUnsignedResume,
@@ -283,9 +283,16 @@ export async function prepareAgentGenerationHarness(
   })
 
   // Agent mode owns its identity header: session-level system messages are
-  // dropped from the transcript. A Copilot's prompt is frozen into the snapshot
-  // and spliced into the Soul section instead.
+  // lifted out of the transcript and spliced into the assembled system prompt,
+  // so the user's own role setting still applies. A Copilot's prompt is frozen
+  // into the snapshot and spliced into the Soul section instead.
+  let sessionInstructionsText = ''
   if (effectiveAgentMode === 'on') {
+    sessionInstructionsText = promptMsgs
+      .filter((message) => message.role === 'system')
+      .map((message) => getMessageText(message, false, false).trim())
+      .filter(Boolean)
+      .join('\n\n')
     promptMsgs = promptMsgs.filter((message) => message.role !== 'system')
   }
 
@@ -404,7 +411,15 @@ export async function prepareAgentGenerationHarness(
       os: getOS(),
     })
     const runtimeMetadata = `\n## Runtime\nCurrent model: ${model.modelId}\nSession context captured: ${formatTimestampWithZone(promptContextSnapshot.capturedAt, promptContextSnapshot.capturedUtcOffsetMinutes)}\n${SYSTEM_REMINDER_PROMPT_INSTRUCTION}`
-    const systemText = `${personaPrompt}\n${instructions}${runtimeMetadata}`
+    // The user's conversation prompt rides between the frozen persona and the
+    // tool instructions so it can override the default persona; a Copilot
+    // session is governed by its persona instead (frozen into the Soul
+    // overlay when the snapshot was captured with the Copilot attached).
+    const conversationInstructions =
+      sessionInstructionsText && !session.copilotId
+        ? `\n## Conversation Instructions\nThe user wrote the following role setting for this conversation. Honor it; where it conflicts with the default persona above, it takes precedence.\n\n<conversation-instructions>\n${sessionInstructionsText}\n</conversation-instructions>\n`
+        : ''
+    const systemText = `${personaPrompt}\n${conversationInstructions}${instructions}${runtimeMetadata}`
     systemPrompt = systemText
     injectedMessages = [
       {

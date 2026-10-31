@@ -1520,7 +1520,7 @@ describe('session prompt context snapshot', () => {
     })
   }
 
-  test('captures and persists a snapshot, drops session system prompts, and pins the capture date', async () => {
+  test('captures and persists a snapshot, splices the session prompt in, and pins the capture date', async () => {
     const persistSessionPromptContextSnapshot = vi.fn()
     const prepared = await prepareWith(
       { provider: ModelProviderEnum.ChatboxAI, modelId: 'test-model' } as SessionSettings,
@@ -1539,8 +1539,14 @@ describe('session prompt context snapshot', () => {
     // Untouched template falls back to the default persona.
     expect(serialized).toContain('Be genuinely helpful, not performatively helpful')
     expect(serialized).toContain('Session context captured:')
-    // A session system prompt without a Copilot stays out of the agent request.
-    expect(serialized).not.toContain('You are a pirate copilot.')
+    // The user's session prompt rides in the Conversation Instructions section.
+    expect(serialized).toContain('## Conversation Instructions')
+    const instructionsIx = serialized.indexOf('## Conversation Instructions')
+    const promptIx = serialized.indexOf('You are a pirate copilot.')
+    expect(promptIx).toBeGreaterThan(instructionsIx)
+    expect(promptIx).toBeLessThan(serialized.indexOf('## Runtime'))
+    // The lifted prompt is no longer a stray transcript message.
+    expect(prepared.promptMsgs.some((message) => message.role === 'system')).toBe(false)
     // Memory tools are part of the agent tool set.
     expect(prepared.tools.save_memory).toBeDefined()
     expect(prepared.tools.delete_memory).toBeDefined()

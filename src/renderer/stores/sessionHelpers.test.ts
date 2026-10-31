@@ -1013,7 +1013,7 @@ describe('searchSessions', () => {
     expect(mockGetItem).not.toHaveBeenCalled()
   })
 
-  it('filters system hits using the effective mode from a light header', async () => {
+  it('keeps system hits searchable in work mode sessions', async () => {
     await seed({
       id: 'one',
       name: 'Chat',
@@ -1023,10 +1023,7 @@ describe('searchSessions', () => {
       ],
     })
     mockGetSessionAgentModeEntry.mockReturnValue({ value: 'on', locked: false, lockReason: null })
-    expect((await searchSessions('needle')).hits.map((hit) => hit.messageId)).toEqual(['user'])
-    expect(mockGetSessionAgentModeEntry).toHaveBeenCalledWith(
-      'one',
-      expect.not.objectContaining({ messages: expect.anything() })
-    )
+    // The session prompt is no longer hidden by Work Mode: it stays searchable.
+    expect((await searchSessions('needle')).hits.map((hit) => hit.messageId)).toEqual(['user', 'system'])
   })
 })

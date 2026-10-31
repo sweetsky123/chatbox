@@ -20,11 +20,12 @@ Agent mode 的 system prompt 由 harness 自行组装(不再走 `injectModelSyst
 2. ## Soul(快照)                        用户编辑的人格/语气/边界;空时回退到内置默认人格
    └ Copilot overlay(快照,可选)        本会话选中的 Copilot 人设,拼在 Soul 正文之后
 3. ## Memories(快照)                    save_memory 写入的条目,带 [id] 前缀
-4. 工具指令(含 Workspace Instructions 快照)
-5. ## Runtime                            Current model + Session context captured(快照日期,非当天日期)
+4. ## Conversation Instructions(可选)   会话级 system prompt(用户为该会话写的角色设定),无 Copilot 时拼入
+5. 工具指令(含 Workspace Instructions 快照)
+6. ## Runtime                            Current model + Session context captured(快照日期,非当天日期)
 ```
 
-有 Copilot 的会话把 Copilot prompt 冻结进 `sessionPromptContextSnapshot.copilotPersona`(长度上限 `COPILOT_PROMPT_MAX_CHARS`=40000,与创建/编辑表单一致),组装时拼进 `## Soul` 段(全局 Soul 在前,Copilot 在后);无 Copilot 的会话级 system prompt 不进入请求。Chat mode 路径完全不变:会话 system prompt 仍作为独立消息发送。界面上工作模式仍隐藏系统提示词入口(身份由 Soul 段表达,见[聊天/工作模式分化](./chat-work-mode-split.md));存储中的 system 消息与 `copilotId` 不动。
+有 Copilot 的会话把 Copilot prompt 冻结进 `sessionPromptContextSnapshot.copilotPersona`(长度上限 `COPILOT_PROMPT_MAX_CHARS`=40000,与创建/编辑表单一致),组装时拼进 `## Soul` 段(全局 Soul 在前,Copilot 在后),此时会话级 system prompt 不重复拼入;无 Copilot 的会话级 system prompt 从 transcript 提取后拼进 `## Conversation Instructions` 段,声明其优先级高于默认人格。Chat mode 路径完全不变:会话 system prompt 仍作为独立消息发送。工作模式界面同样展示并可编辑系统提示词入口(见[聊天/工作模式分化](./chat-work-mode-split.md));存储中的 system 消息与 `copilotId` 不动。
 
 ### 冻结快照(SessionPromptContextSnapshot)
 
@@ -74,7 +75,7 @@ Agent mode 的 system prompt 由 harness 自行组装(不再走 `injectModelSyst
 | `src/shared/agent-persona/memory-import.ts` | Markdown/TXT/JSON 记忆文件解析与聊天历史识别 |
 | `src/main/agent-persona/local-memory-scanner.ts` | 固定位置的 Claude/Codex 本地记忆发现与解析 |
 | `src/renderer/stores/agentPersonaStore.ts` | Soul/memories 存储 CRUD、模板初始化、快照捕获 |
-| `src/renderer/stores/session/agent-harness.ts` | system prompt 组装;会话 system 消息从 transcript 去掉,Copilot 人设经 Soul 段注入 |
+| `src/renderer/stores/session/agent-harness.ts` | system prompt 组装;会话 system 消息从 transcript 提取后拼进 Conversation Instructions 段,Copilot 人设经 Soul 段注入 |
 | `src/renderer/stores/session/prompt-context-snapshot.ts` | 快照解析策略(agent/chat 两种模式的捕获与复用规则) |
 | `src/renderer/stores/session/agent-mode.ts` | `persistSessionPromptContextSnapshotGuarded`(CAS 防护的快照持久化) |
 | `src/renderer/packages/model-calls/toolsets/agent-memory.ts` | save_memory / delete_memory 工具 |
@@ -84,6 +85,6 @@ Agent mode 的 system prompt 由 harness 自行组装(不再走 `injectModelSyst
 
 ## 兼容性
 
-- 存量会话的 system prompt 与 `copilotId` 数据不动。Agent mode 生成路径把 Copilot 人设冻进快照并拼进 Soul;无 Copilot 的会话级 system prompt 仍不进入请求。Chat mode 与 Copilot 选择入口不变。
+- 存量会话的 system prompt 与 `copilotId` 数据不动。Agent mode 生成路径把 Copilot 人设冻进快照并拼进 Soul;无 Copilot 的会话级 system prompt 拼进 Conversation Instructions 段进入请求。Chat mode 与 Copilot 选择入口不变。
 - `sessionPromptContextSnapshot` 为 optional + `.catch(undefined)`;旧的 `agentPromptSnapshot` 尚未进入正式版,不保留字段迁移。
 - 新存储 key(`agent-soul` / `agent-memories`)为增量添加,不涉及 IndexedDB 版本变更。

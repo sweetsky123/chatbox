@@ -80,12 +80,12 @@ function makeSession(settings: SessionHeader['settings']): SessionHeader {
   }
 }
 
-function renderContent(session: SessionHeader, mode: 'chat' | 'work' = 'chat') {
+function renderContent(session: SessionHeader) {
   const onEdit = vi.fn()
   return Object.assign(onEdit, {
     view: render(
       <MantineProvider>
-        <SessionSettingsContent session={session} draftSystemPrompt="Be concise." mode={mode} onEdit={onEdit} />
+        <SessionSettingsContent session={session} draftSystemPrompt="Be concise." onEdit={onEdit} />
       </MantineProvider>
     ),
   })
@@ -153,7 +153,7 @@ describe('SessionSettingsContent', () => {
     fireEvent.click(screen.getByTestId('session-panel-restore-all'))
     onEdit.view.rerender(
       <MantineProvider>
-        <SessionSettingsContent session={makeSession({})} draftSystemPrompt="Be concise." mode="chat" onEdit={onEdit} />
+        <SessionSettingsContent session={makeSession({})} draftSystemPrompt="Be concise." onEdit={onEdit} />
       </MantineProvider>
     )
     fireEvent.click(screen.getByTestId('session-panel-undo-restore'))
@@ -170,7 +170,7 @@ describe('SessionSettingsContent', () => {
     )
     const renderWith = (session: SessionHeader) => (
       <MantineProvider>
-        <SessionSettingsContent session={session} mode="chat" onEdit={onEdit} />
+        <SessionSettingsContent session={session} onEdit={onEdit} />
       </MantineProvider>
     )
     const view = render(renderWith(makeSession({})))
@@ -197,7 +197,7 @@ describe('SessionSettingsContent', () => {
     )
     const renderWith = (session: SessionHeader) => (
       <MantineProvider>
-        <SessionSettingsContent session={session} mode="chat" onEdit={onEdit} />
+        <SessionSettingsContent session={session} onEdit={onEdit} />
       </MantineProvider>
     )
     const view = render(renderWith(makeSession({})))
@@ -235,7 +235,7 @@ describe('SessionSettingsContent', () => {
     const onEdit = vi.fn(() => Promise.reject(new Error('Session not found')))
     render(
       <MantineProvider>
-        <SessionSettingsContent session={makeSession({})} mode="chat" onEdit={onEdit} />
+        <SessionSettingsContent session={makeSession({})} onEdit={onEdit} />
       </MantineProvider>
     )
     const name = screen.getByTestId('session-settings-name')
@@ -245,10 +245,9 @@ describe('SessionSettingsContent', () => {
     expect(addToast).toHaveBeenCalledWith('Failed to save settings')
   })
 
-  test('offers the persona instead of a system prompt in Work Mode', () => {
-    renderContent(makeSession({}), 'work')
-    expect(screen.queryByTestId('session-settings-prompt')).toBeNull()
-    expect(screen.getByText('Edit persona')).toBeTruthy()
+  test('offers the system prompt editor regardless of the session mode', () => {
+    renderContent(makeSession({}))
+    expect(screen.getByTestId('session-settings-prompt')).toBeTruthy()
   })
 
   test('commits a name still being typed when the panel closes', () => {

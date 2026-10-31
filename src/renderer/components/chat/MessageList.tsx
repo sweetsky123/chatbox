@@ -1,6 +1,6 @@
 import type { SessionHeaderRead } from '@chatbox/core/ports'
 import { getSessionActionGate } from '@chatbox/core/session/action-gates'
-import { isActionAvailableInMode, resolveSessionMode, type SessionMode } from '@chatbox/core/session/mode-policy'
+import { resolveSessionMode, type SessionMode } from '@chatbox/core/session/mode-policy'
 import type { PromptCacheDeleteTarget } from '@chatbox/core/session/prompt-cache-policy'
 import type { SessionTranscriptViewportAnchor } from '@chatbox/react/query'
 import NiceModal from '@ebay/nice-modal-react'
@@ -92,7 +92,7 @@ const MessageList = forwardRef<
   const sessionMode = resolveSessionMode(useSessionAgentMode(session.id).value)
   const controls = useSessionControls(session, session.id)
   const sessionLocks = controls.locks
-  const hideSystemPrompt = hideSystemPromptSetting || !isActionAvailableInMode('session-system-prompt', sessionMode)
+  const hideSystemPrompt = hideSystemPromptSetting
   const container = useRef<HTMLDivElement>(null)
   const scroller = useRef<HTMLElement | null>(null)
   const reportedScrollTop = useRef(0)

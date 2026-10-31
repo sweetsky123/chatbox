@@ -40,7 +40,7 @@ describe('SessionSearchService', () => {
     expect((await search.search('a+b [y]')).hits).toEqual([])
   })
 
-  it('filters prompts and searches archived selected paths, excluding inactive forks', async () => {
+  it('filters prompts via the explicit option and keeps work-mode prompts searchable', async () => {
     const value = session('a', [message('system', 'secret needle', 'system'), message('current', 'needle now')])
     value.threads = [{ id: 'old', name: 'Old', createdAt: 1, messages: [message('history', 'needle before')] }]
     value.messageForksHash = {
@@ -61,7 +61,8 @@ describe('SessionSearchService', () => {
       type: 'header',
       updater: { settings: { agentMode: { value: 'on', locked: false, lockReason: null } } },
     })
-    expect((await search.search('needle')).hits.map((hit) => hit.messageId)).toEqual(['current', 'history'])
+    // Work mode no longer hides the conversation prompt: it stays searchable.
+    expect((await search.search('needle')).hits.map((hit) => hit.messageId)).toEqual(['current', 'system', 'history'])
   })
 
   it('follows bounded older cursors across threads', async () => {
@@ -245,8 +246,10 @@ describe('SessionSearchService', () => {
         })
       return repository.readSessionSearchCandidates(request)
     })
+    // The renamed title drops the title hit, but the prompt stays visible in
+    // work mode, so its hit survives the final-header recheck.
     expect(await search.search('needle', { sessionId: 'a' })).toEqual({
-      hits: [],
+      hits: [{ sessionId: 'a', sessionName: 'Renamed', messageId: 'system', preview: expect.any(String) }],
       failedSessionIds: [],
       limitReached: false,
     })

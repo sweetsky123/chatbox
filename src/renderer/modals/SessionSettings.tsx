@@ -1,4 +1,3 @@
-import { resolveSessionMode } from '@chatbox/core/session/mode-policy'
 import NiceModal, { useModal } from '@ebay/nice-modal-react'
 import { Button } from '@mantine/core'
 import { TestId } from '@shared/automation/testids'
@@ -11,7 +10,6 @@ import { applySessionEdit, type SessionEdit } from '@/components/session/session
 import { SettingsDensityProvider } from '@/components/settings/SettingsLayout'
 import { useIsSmallScreen } from '@/hooks/useScreenChange'
 import { trackingEvent } from '@/packages/event'
-import { getSessionAgentModeEntry } from '@/stores/session/agent-mode'
 
 /**
  * Conversation settings for a chat that is not saved yet, such as the new-chat page. Changes apply
@@ -56,8 +54,6 @@ const SessionSettingsModal = NiceModal.create(
       void modal.hide()
     }
 
-    const mode = resolveSessionMode(getSessionAgentModeEntry(session.id, session).value)
-
     return (
       <AdaptiveModal
         opened={modal.visible}
@@ -69,7 +65,7 @@ const SessionSettingsModal = NiceModal.create(
         trapFocus={false}
       >
         <SettingsDensityProvider density={isSmallScreen ? 'touch' : 'compact'}>
-          <SessionSettingsContent session={draft} draftSystemPrompt={prompt} mode={mode} onEdit={onEdit} />
+          <SessionSettingsContent session={draft} draftSystemPrompt={prompt} onEdit={onEdit} />
         </SettingsDensityProvider>
         <AdaptiveModal.Actions>
           <Button data-testid={TestId.settings.sessionSave} onClick={close}>

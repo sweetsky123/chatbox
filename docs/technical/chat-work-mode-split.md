@@ -32,7 +32,7 @@
 | 删除消息 | 允许 | 允许；对话已有可缓存前缀时，删除历史消息需二次确认（可按场景勾选不再提示） |
 | 编辑压缩摘要 | 允许 | 允许 |
 | 编辑用户消息 | 允许（可只存不发） | 仅 Save & Resend，无"仅保存"，禁改角色 |
-| 会话系统提示词 | 消息列表展示，会话设置可编辑（受"隐藏系统提示词"开关控制） | 两处入口都隐藏（身份由 Soul 表达；Copilot 人设冻进 Soul 段，无 Copilot 的会话 prompt 不进入请求） |
+| 会话系统提示词 | 消息列表展示，会话设置可编辑（受"隐藏系统提示词"开关控制） | 两处入口同样可用（fork 变更：恢复用户自定义角色设定；无 Copilot 的会话 prompt 拼进请求的 Conversation Instructions 段，Copilot 人设仍冻进 Soul 段不重复） |
 | 新话题 / 话题历史 | 允许 | 不允许创建新话题；无历史时隐藏话题历史，已有归档话题时保留分隔与历史入口 |
 | 切换模型 | 允许 | 对话已有可缓存前缀时需二次确认（可勾选不再提示） |
 | 消息队列（message queue） | **禁用**（生成中阻断发送） | 保留 |
@@ -50,7 +50,7 @@
 
 ## 模式策略模块（mode-policy）
 
-静态能力限制收敛在 `packages/chatbox-core/src/session/mode-policy.ts`：`isActionAvailableInMode(action, mode)`，动作词表包括 `reply-below`、`edit-assistant-message`、`delete-message`、`delete-fork`、`save-message-edit`（仅保存不重发）、`session-system-prompt`（会话自带的系统提示词）、`queue-message`、`steer-queued-message`、`create-thread`（新话题）、`thread-history`（话题历史列表 / 抽屉 / 消息流标签）。工作模式助手消息编辑由 `shouldRestrictMessageEditToLastOutput` 收窄为只改最后一段可见输出文本。工作模式在对话已有可缓存前缀时，删除历史消息与切换模型的二次确认由 `packages/chatbox-core/src/session/prompt-cache-policy.ts` 判定。
+静态能力限制收敛在 `packages/chatbox-core/src/session/mode-policy.ts`：`isActionAvailableInMode(action, mode)`，动作词表包括 `reply-below`、`edit-assistant-message`、`delete-message`、`delete-fork`、`save-message-edit`（仅保存不重发）、`session-system-prompt`（会话自带的系统提示词，fork 变更后两个模式均可用）、`queue-message`、`steer-queued-message`、`create-thread`（新话题）、`thread-history`（话题历史列表 / 抽屉 / 消息流标签）。工作模式助手消息编辑由 `shouldRestrictMessageEditToLastOutput` 收窄为只改最后一段可见输出文本。工作模式在对话已有可缓存前缀时，删除历史消息与切换模型的二次确认由 `packages/chatbox-core/src/session/prompt-cache-policy.ts` 判定。
 
 与 `action-gates.ts` 的分工刻意区分两种语义：
 

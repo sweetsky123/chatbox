@@ -1,5 +1,5 @@
 import { rendererApplication } from '@/app/renderer-application'
-import { resolveSessionMode, type SessionMode } from '@chatbox/core/session/mode-policy'
+import { resolveSessionMode } from '@chatbox/core/session/mode-policy'
 import { Button, Loader, SegmentedControl } from '@mantine/core'
 import { TestId } from '@shared/automation/testids'
 import type { SessionHeader } from '@shared/types'
@@ -88,7 +88,7 @@ export function SessionSheet({
               </div>
             ) : (
               <SettingsDensityProvider density="touch">
-                <SheetSessionSettings key={session.id} session={session} mode={mode} />
+                <SheetSessionSettings key={session.id} session={session} />
               </SettingsDensityProvider>
             )}
           </div>
@@ -99,7 +99,7 @@ export function SessionSheet({
 }
 
 /** Keyed per conversation, so edits still pending when the sheet moves on land in the chat they were typed in. */
-function SheetSessionSettings({ session, mode }: { session: SessionHeader; mode: SessionMode }) {
+function SheetSessionSettings({ session }: { session: SessionHeader }) {
   const onEdit = usePersistedSessionEdit(session)
-  return <SessionSettingsContent session={session} mode={mode} onEdit={onEdit} />
+  return <SessionSettingsContent session={session} onEdit={onEdit} />
 }

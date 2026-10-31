@@ -57,7 +57,6 @@ const WORK_MODE_UNAVAILABLE: ReadonlySet<ModePolicyAction> = new Set([
   'reply-below',
   'delete-fork',
   'save-message-edit',
-  'session-system-prompt',
   'create-thread',
   'thread-history',
 ])

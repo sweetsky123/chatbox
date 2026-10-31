@@ -2,7 +2,6 @@ import { escapeSearchInput } from '@shared/services/native-session-search'
 import { getMessageText } from '@shared/utils/message'
 import type { SessionSearchRepositoryPort, SessionSearchWindowRequest } from '../../ports/session-search-source'
 import { SessionRowConflictError } from '../../ports/session-row-store'
-import { isActionAvailableInMode, resolveSessionMode } from '../../session/mode-policy'
 import type { Message, SessionHeader, SessionMetaPage } from '../../types'
 
 export interface SessionSearchPort extends SessionSearchRepositoryPort {
@@ -82,10 +81,9 @@ export class SessionSearchService {
           if (!initial) return
           const visible = (role: Message['role'], hasBackgroundTask: boolean, header: SessionHeader) => {
             const hidesPrompt =
-              (typeof options.hideSystemPromptMessage === 'function'
+              typeof options.hideSystemPromptMessage === 'function'
                 ? options.hideSystemPromptMessage(header)
-                : Boolean(options.hideSystemPromptMessage)) ||
-              !isActionAvailableInMode('session-system-prompt', resolveSessionMode(header.settings?.agentMode?.value))
+                : Boolean(options.hideSystemPromptMessage)
             return (
               !(hidesPrompt && role === 'system') &&
               !(options.conversationOnly && (hasBackgroundTask || (role !== 'user' && role !== 'assistant')))

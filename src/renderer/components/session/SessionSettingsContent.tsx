@@ -1,6 +1,4 @@
-import { isActionAvailableInMode, type SessionMode } from '@chatbox/core/session/mode-policy'
 import {
-  Anchor,
   Box,
   Button,
   FileButton,
@@ -39,7 +37,6 @@ import {
 } from '@/components/settings/SettingsLayout'
 import { useFieldDraft } from '@/hooks/useFieldDraft'
 import { useProviders } from '@/hooks/useProviders'
-import { navigateToSettings } from '@/modals/settings-navigation'
 import { StorageKeyGenerator } from '@/storage/StoreStorage'
 import {
   countSessionDifferences,
@@ -140,12 +137,10 @@ function useOptimisticSettings(
  */
 export function SessionSettingsContent({
   session,
-  mode,
   draftSystemPrompt,
   onEdit,
 }: {
   session: SessionHeader
-  mode: SessionMode
   draftSystemPrompt?: string
   onEdit: (edit: SessionEdit) => unknown
 }) {
@@ -173,7 +168,6 @@ export function SessionSettingsContent({
   const keys = visibleSessionParameterKeys(settings)
   const overrideCount = countSessionDifferences(settings, keys, global)
   const isChat = session.type !== 'picture'
-  const showSystemPrompt = isActionAvailableInMode('session-system-prompt', mode)
 
   const name = useCommittedText(session.name, (value) => void save({ name: value }), false)
   const { read: headerRead } = rendererApplication.sessionHooks.useSessionHeader(
@@ -272,31 +266,23 @@ export function SessionSettingsContent({
         )}
       </Flex>
 
-      {isChat &&
-        (showSystemPrompt ? (
-          <SettingsSection title={t('Instruction')} bare>
-            <Textarea
-              data-testid={TestId.settings.sessionPrompt}
-              aria-label={t('Instruction (System Prompt)') ?? undefined}
-              placeholder={t('Copilot Prompt Demo') || ''}
-              autosize
-              minRows={2}
-              maxRows={10}
-              disabled={promptRead.isLoading || promptRead.isError}
-              value={systemPrompt.value}
-              onChange={(e) => systemPrompt.onChange(e.currentTarget.value)}
-              onBlur={systemPrompt.onBlur}
-              styles={{ input: { touchAction: 'manipulation' } }}
-            />
-          </SettingsSection>
-        ) : (
-          <Text fz={12} c="chatbox-tertiary" lh="18px">
-            {t('Work Mode uses the agent persona instead of a conversation prompt.')}{' '}
-            <Anchor fz={12} component="button" onClick={() => navigateToSettings('/agent')}>
-              {t('Edit persona')}
-            </Anchor>
-          </Text>
-        ))}
+      {isChat && (
+        <SettingsSection title={t('Instruction')} bare>
+          <Textarea
+            data-testid={TestId.settings.sessionPrompt}
+            aria-label={t('Instruction (System Prompt)') ?? undefined}
+            placeholder={t('Copilot Prompt Demo') || ''}
+            autosize
+            minRows={2}
+            maxRows={10}
+            disabled={promptRead.isLoading || promptRead.isError}
+            value={systemPrompt.value}
+            onChange={(e) => systemPrompt.onChange(e.currentTarget.value)}
+            onBlur={systemPrompt.onBlur}
+            styles={{ input: { touchAction: 'manipulation' } }}
+          />
+        </SettingsSection>
+      )}
 
       {isChat && (
         <SettingsSection

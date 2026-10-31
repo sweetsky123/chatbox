@@ -11,18 +11,22 @@ describe('resolveSessionMode', () => {
 })
 
 describe('isActionAvailableInMode', () => {
-  it('removes structural surgery and the session system prompt from work mode', () => {
+  it('removes structural surgery from work mode', () => {
     for (const action of [
       'reply-below',
       'delete-fork',
       'save-message-edit',
-      'session-system-prompt',
       'create-thread',
       'thread-history',
     ] as const) {
       expect(isActionAvailableInMode(action, 'work')).toBe(false)
       expect(isActionAvailableInMode(action, 'chat')).toBe(true)
     }
+  })
+
+  it('keeps the session system prompt available in both modes', () => {
+    expect(isActionAvailableInMode('session-system-prompt', 'work')).toBe(true)
+    expect(isActionAvailableInMode('session-system-prompt', 'chat')).toBe(true)
   })
 
   it('keeps assistant message editing available in both modes', () => {

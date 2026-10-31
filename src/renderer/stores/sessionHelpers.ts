@@ -6,7 +6,6 @@ import {
   type PickedAsset,
 } from '@chatbox/core/application/attachments'
 import { projectSessionMeta, SessionSearchService, type SessionSearchOptions } from '@chatbox/core/application/session'
-import { isActionAvailableInMode, resolveSessionMode } from '@chatbox/core/session/mode-policy'
 import { isSessionAttachmentRagSupportedFilePath, isSupportedFile, isTextFilePath } from '@shared/file-extensions'
 import {
   CHATBOX_AI_PARSER_LICENSE_KEY_REQUIRED_ERROR,
@@ -37,7 +36,6 @@ import { createMessage, type Message, SessionSettingsSchema, TOKEN_CACHE_KEYS } 
 import type { AttachmentPreparationResult, PreprocessedFile } from '../types/input-box'
 import { resolveChatboxLicenseDefaultModel } from './defaultChatModel'
 import { lastUsedModelStore } from './lastUsedModelStore'
-import { getSessionAgentModeEntry } from './session/agent-mode'
 import { SESSION_ATTACHMENT_RAG_LARGE_ATTACHMENT_WARNING } from './sessionAttachmentRagErrors'
 import * as settingActions from './settingActions'
 import { getPlatformDefaultDocumentParser, settingsStore } from './settingsStore'
@@ -1014,12 +1012,8 @@ export async function searchSessions(searchInput: string, options: SessionSearch
   return new SessionSearchService(rendererApplication.sessions).search(searchInput, {
     ...options,
     hideSystemPromptMessage: (header) =>
-      (typeof options.hideSystemPromptMessage === 'function'
+      typeof options.hideSystemPromptMessage === 'function'
         ? options.hideSystemPromptMessage(header)
-        : Boolean(options.hideSystemPromptMessage)) ||
-      !isActionAvailableInMode(
-        'session-system-prompt',
-        resolveSessionMode(getSessionAgentModeEntry(header.id, header).value)
-      ),
+        : Boolean(options.hideSystemPromptMessage),
   })
 }
