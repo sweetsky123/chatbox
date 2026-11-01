@@ -1,12 +1,14 @@
 name: Build Release
 
-# Manual build: enter an existing git tag (e.g. v1.24.0) and every platform
-# artifact for that tag is built, smoke-tested, and attached to a release.
+# Manual build: enter a tag name (e.g. v1.24.0) and every platform artifact
+# for that tag is built, smoke-tested, and attached to a release. If the tag
+# does not exist yet it is created on the current main HEAD after the unit
+# suite passes; if it exists the tagged commit is built.
 on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Tag to build (e.g. v1.24.0) — must already exist'
+        description: 'Tag to build or create (e.g. v1.24.0)'
         required: true
         type: string
 
@@ -21,10 +23,22 @@ jobs:
   # Compile-time gate: the exact source being built must pass the unit suite.
   unit-tests:
     runs-on: ubuntu-latest
+    outputs:
+      sha: ${{ steps.resolve.outputs.sha }}
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.tag }}
+          fetch-depth: 0
+      - name: Resolve build ref (existing tag or main HEAD)
+        id: resolve
+        run: |
+          if git ls-remote --exit-code --tags origin "refs/tags/${{ inputs.tag }}" >/dev/null 2>&1; then
+            git checkout "refs/tags/${{ inputs.tag }}"
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
@@ -38,6 +52,11 @@ jobs:
           node scripts/generate-routes.mjs
       - name: Unit tests
         run: pnpm test:unit
+      - name: Create the tag on the tested commit
+        if: steps.resolve.outputs.exists == 'false'
+        run: |
+          git tag "${{ inputs.tag }}"
+          git push origin "refs/tags/${{ inputs.tag }}"
 
   build-windows:
     runs-on: windows-latest
@@ -47,7 +66,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.tag }}
+          ref: ${{ needs.unit-tests.outputs.sha }}
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
@@ -118,7 +137,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.tag }}
+          ref: ${{ needs.unit-tests.outputs.sha }}
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
@@ -167,7 +186,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.tag }}
+          ref: ${{ needs.unit-tests.outputs.sha }}
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
@@ -219,7 +238,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.tag }}
+          ref: ${{ needs.unit-tests.outputs.sha }}
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
