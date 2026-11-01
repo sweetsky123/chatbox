@@ -103,8 +103,8 @@ jobs:
           name: windows
           path: |
             release/build/Chatbox-*-Setup-*.exe
-            release/build/Chatbox-*-Portable-*.exe
-            release/build/Chatbox-*-portable-zip-*.zip
+            release/build/Chatbox-*-Portable.exe
+            release/build/Chatbox-*-portable-zip.zip
           if-no-files-found: error
 
   build-macos:
