@@ -1,19 +1,19 @@
-// modified from https://github.com/raycast/extensions/blob/main/extensions/model-context-protocol-registry/src/registries/builtin/entries.ts
-
+// 修改自 https://github.com/raycast/extensions/blob/main/extensions/model-context-protocol-registry/src/registries/builtin/entries.ts
 /// <reference types="vite/client" />
-
 import { fromPairs } from 'lodash'
 
-// Use Vite's import.meta.glob to dynamically import all PNG files
-// Vite handles import.meta.glob at build time, even though TypeScript doesn't recognize it with commonjs module setting
-// @ts-ignore - import.meta.glob is a Vite feature
-const logosModules = import.meta.glob<{ default: string }>('../../../static/logos/*.png', { eager: true })
+// 使用 Vite 的 import.meta.glob 动态导入所有 PNG 文件
+// 即使 TypeScript 在 commonjs 模块设置下无法识别 import.meta.glob，Vite 也会在构建时对其进行处理
+// @ts-ignore - import.meta.glob 是 Vite 提供的特性
+const logosModules = import.meta.glob<{ default: string }>('../../../static/logos/*.png', {
+  eager: true,
+})
 
 const logos: Record<string, string> = fromPairs(
   Object.entries(logosModules).map(([path, module]) => {
     const name = path.split('/').pop() || ''
     return [name, (module as { default: string }).default]
-  })
+  }),
 )
 
 function getIcon(filename: string): string {
@@ -37,8 +37,7 @@ export const MCP_ENTRIES_OFFICIAL: MCPRegistryEntry[] = [
   {
     name: 'brave-search',
     title: 'Brave Search',
-    description:
-      'A Model Context Protocol server for Brave Search. This server provides tools to read, search, and manipulate Brave Search repositories via Large Language Models.',
+    description: '面向 Brave Search 的 MCP 服务器。该服务器提供了一系列工具，使LLM能够读取、搜索和操作 Brave Search 资源库。',
     icon: 'https://svgl.app/library/brave.svg',
     homepage: 'https://github.com/modelcontextprotocol/servers/tree/HEAD/src/brave-search',
     configuration: {
@@ -52,8 +51,7 @@ export const MCP_ENTRIES_OFFICIAL: MCPRegistryEntry[] = [
   {
     name: 'chroma',
     title: 'Chroma',
-    description:
-      'This server provides data retrieval capabilities powered by Chroma, enabling AI models to create collections over generated data and user inputs, and retrieve that data using vector search, full text search, metadata filtering, and more.',
+    description: '提供由 Chroma 驱动的数据检索能力，使 AI 模型能够基于生成的数据和用户输入创建集合，并通过向量搜索、全文搜索、元数据过滤等多种方式检索这些数据。',
     icon: getIcon('chroma.png'),
     homepage: 'https://github.com/chroma-core/chroma-mcp',
     configuration: {
@@ -74,8 +72,7 @@ export const MCP_ENTRIES_OFFICIAL: MCPRegistryEntry[] = [
   {
     name: 'context-7',
     title: 'Context 7',
-    description:
-      'Context7 MCP pulls up-to-date, version-specific documentation and code examples straight from the source — and places them directly into your prompt.',
+    description: 'Context7 MCP 直接从源头获取最新的、特定版本的文档与代码示例，并将其直接注入你的提示词中。',
     icon: getIcon('context-7.png'),
     homepage: 'https://github.com/upstash/context7',
     configuration: {
@@ -86,8 +83,7 @@ export const MCP_ENTRIES_OFFICIAL: MCPRegistryEntry[] = [
   {
     name: 'git',
     title: 'Git',
-    description:
-      'A Model Context Protocol server for Git repository interaction and automation. This server provides tools to read, search, and manipulate Git repositories via Large Language Models.',
+    description: '面向 Git 仓库交互与自动化的 MCP 服务器。该服务器提供了一系列工具，使LLM能够读取、搜索和操作 Git 仓库。',
     icon: 'https://svgl.app/library/git.svg',
     homepage: 'https://github.com/modelcontextprotocol/servers/tree/main/src/git',
     configuration: {
@@ -98,11 +94,9 @@ export const MCP_ENTRIES_OFFICIAL: MCPRegistryEntry[] = [
   {
     name: 'github',
     title: 'GitHub',
-    description:
-      'The GitHub MCP Server is a Model Context Protocol (MCP) server that provides seamless integration with GitHub APIs, enabling advanced automation and interaction capabilities for developers and tools.',
+    description: 'GitHub MCP Server 是一个 MCP 服务器，可与 GitHub API 无缝集成，为开发者和工具提供高级自动化与交互能力。',
     icon: 'https://svgl.app/library/github_light.svg',
-    homepage:
-      'https://github.com/github/github-mcp-server?utm_source=Blog&utm_medium=GitHub&utm_campaign=proplus&utm_notesblogtop',
+    homepage: 'https://github.com/github/github-mcp-server?utm_source=Blog&utm_medium=GitHub&utm_campaign=proplus&utm_notesblogtop',
     configuration: {
       command: 'docker',
       args: ['run', '-i', '--rm', '-e', 'GITHUB_PERSONAL_ACCESS_TOKEN', 'ghcr.io/github/github-mcp-server'],
@@ -114,7 +108,7 @@ export const MCP_ENTRIES_OFFICIAL: MCPRegistryEntry[] = [
   {
     name: 'gitlab',
     title: 'GitLab',
-    description: 'MCP Server for the GitLab API, enabling project management, file operations, and more.',
+    description: '面向 GitLab API 的 MCP 服务器，支持项目管理、文件操作等多种功能。',
     icon: 'https://svgl.app/library/gitlab.svg',
     homepage: 'https://github.com/modelcontextprotocol/servers/tree/main/src/gitlab',
     configuration: {
@@ -122,14 +116,14 @@ export const MCP_ENTRIES_OFFICIAL: MCPRegistryEntry[] = [
       args: ['-y', '@modelcontextprotocol/server-gitlab'],
       env: {
         GITLAB_PERSONAL_ACCESS_TOKEN: '<YOUR_TOKEN>',
-        GITLAB_API_URL: 'https://gitlab.com/api/v4', // Optional, for self-hosted instances
+        GITLAB_API_URL: 'https://gitlab.com/api/v4', // 可选，用于自托管实例
       },
     },
   },
   {
     name: 'e2b',
     title: 'E2B Code Interpreter',
-    description: 'A Model Context Protocol server for running code in a secure sandbox by [E2B](https://e2b.dev/).',
+    description: '由 [E2B](https://e2b.dev/) 提供的 MCP 服务器，用于在安全沙箱中运行代码。',
     icon: getIcon('e2b.png'),
     homepage: 'https://github.com/e2b-dev/mcp-server/blob/main/packages/js/README.md',
     configuration: {
@@ -143,8 +137,7 @@ export const MCP_ENTRIES_OFFICIAL: MCPRegistryEntry[] = [
   {
     name: 'exa',
     title: 'Exa',
-    description:
-      'A Model Context Protocol (MCP) server lets AI assistants like Claude use the Exa AI Search API for web searches. This setup allows AI models to get real-time web information in a safe and controlled way.',
+    description: '一个 MCP 服务器，让 Claude 等 AI 助手能够使用 Exa AI 搜索 API 进行网络搜索。这种配置使 AI 模型能够以安全、可控的方式获取实时网络信息。',
     icon: getIcon('exa.png'),
     homepage: 'https://github.com/exa-labs/exa-mcp-server',
     configuration: {
@@ -158,7 +151,7 @@ export const MCP_ENTRIES_OFFICIAL: MCPRegistryEntry[] = [
   {
     name: 'google-drive',
     title: 'Google Drive',
-    description: 'This MCP server integrates with Google Drive to allow listing, reading, and searching over files.',
+    description: '该 MCP 服务器与 Google Drive 集成，支持列出、读取和搜索文件。',
     icon: 'https://svgl.app/library/drive.svg',
     homepage: 'https://github.com/modelcontextprotocol/servers/tree/main/src/gdrive',
     configuration: {
@@ -172,7 +165,7 @@ export const MCP_ENTRIES_OFFICIAL: MCPRegistryEntry[] = [
   {
     name: 'jetbrains',
     title: 'JetBrains',
-    description: 'The server proxies requests from client to JetBrains IDE.',
+    description: '该服务器负责将客户端的请求代理转发至 JetBrains IDE。',
     icon: 'https://svgl.app/library/jetbrains.svg',
     homepage: 'https://github.com/JetBrains/mcp-jetbrains',
     configuration: {
@@ -183,8 +176,7 @@ export const MCP_ENTRIES_OFFICIAL: MCPRegistryEntry[] = [
   {
     name: 'heroku',
     title: 'Heroku',
-    description:
-      'The Heroku Platform MCP Server is a specialized Model Context Protocol (MCP) implementation designed to facilitate seamless interaction between large language models (LLMs) and the Heroku Platform. This server provides a robust set of tools and capabilities that enable LLMs to read, manage, and operate Heroku Platform resources.',
+    description: 'Heroku Platform MCP Server 是一个专门的 MCP 实现，旨在实现 LLM 与 Heroku 平台之间的无缝交互。该服务器提供了一套完善的工具与能力，使LLM能够读取、管理和操作 Heroku 平台资源。',
     icon: getIcon('heroku.png'),
     homepage: 'https://github.com/heroku/heroku-mcp-server',
     configuration: {
@@ -198,8 +190,7 @@ export const MCP_ENTRIES_OFFICIAL: MCPRegistryEntry[] = [
   {
     name: 'filesystem',
     title: 'Filesystem',
-    description:
-      'Node.js server implementing Model Context Protocol (MCP) for filesystem operations. The server will only allow operations within directories specified via args.',
+    description: '实现了 MCP 协议的 Node.js 服务器，用于文件系统操作。该服务器仅允许在通过 args 参数指定的目录内执行操作。',
     icon: 'filesystem.svg',
     homepage: 'https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem',
     configuration: {
@@ -210,8 +201,7 @@ export const MCP_ENTRIES_OFFICIAL: MCPRegistryEntry[] = [
   {
     name: 'paddle',
     title: 'Paddle',
-    description:
-      'Paddle Billing is the developer-first merchant of record. We take care of payments, tax, subscriptions, and metrics with one unified API that does it all. This is a Model Context Protocol (MCP) server that provides tools for interacting with the Paddle API.',
+    description: 'Paddle Billing 是以开发者为先的记录商户，通过一套统一的 API 即可处理支付、税务、订阅和指标等所有事务。这是一个 MCP 服务器，提供与 Paddle API 交互所需的工具。',
     icon: getIcon('paddle.png'),
     homepage: 'https://github.com/PaddleHQ/paddle-mcp-server',
     configuration: {
@@ -222,8 +212,7 @@ export const MCP_ENTRIES_OFFICIAL: MCPRegistryEntry[] = [
   {
     name: 'perplexity',
     title: 'Perplexity',
-    description:
-      'An MCP server implementation that integrates the Sonar API to provide Claude with unparalleled real-time, web-wide research.',
+    description: '一个 MCP 服务器实现，集成了 Sonar API，为 Claude 提供无与伦比的实时全网研究能力。',
     icon: 'https://svgl.app/library/perplexity.svg',
     homepage: 'https://github.com/ppl-ai/modelcontextprotocol',
     configuration: {
@@ -237,7 +226,7 @@ export const MCP_ENTRIES_OFFICIAL: MCPRegistryEntry[] = [
   {
     name: 'sentry',
     title: 'Sentry',
-    description: "This service provides a Model Context Provider (MCP) for interacting with Sentry's API.",
+    description: "该服务提供一个 MCP 服务，用于与 Sentry 的 API 进行交互。",
     icon: getIcon('sentry.png'),
     homepage: 'https://mcp.sentry.dev/',
     configuration: {
@@ -248,7 +237,7 @@ export const MCP_ENTRIES_OFFICIAL: MCPRegistryEntry[] = [
   {
     name: 'slack',
     title: 'Slack',
-    description: "This service provides a Model Context Provider (MCP) for interacting with Slack's API.",
+    description: "该服务提供一个 MCP 服务，用于与 Slack 的 API 进行交互。",
     icon: 'https://svgl.app/library/slack.svg',
     homepage: 'https://github.com/modelcontextprotocol/servers/tree/main/src/slack',
     configuration: {
@@ -264,8 +253,7 @@ export const MCP_ENTRIES_OFFICIAL: MCPRegistryEntry[] = [
   {
     name: 'square',
     title: 'Square',
-    description:
-      "This project follows the Model Context Protocol standard, allowing AI assistants to interact with Square's connect API.",
+    description: "该项目遵循 MCP 标准，使 AI 助手能够与 Square 的 Connect API 进行交互。",
     icon: getIcon('square.png'),
     homepage: 'https://github.com/square/square-mcp-server',
     configuration: {
@@ -276,8 +264,7 @@ export const MCP_ENTRIES_OFFICIAL: MCPRegistryEntry[] = [
   {
     name: 'stripe',
     title: 'Stripe',
-    description:
-      "This project follows the Model Context Protocol standard, allowing AI assistants to interact with Stripe's API.",
+    description: "该项目遵循 MCP 标准，使 AI 助手能够与 Stripe 的 API 进行交互。",
     icon: 'https://svgl.app/library/stripe.svg',
     homepage: 'https://github.com/stripe/agent-toolkit',
     configuration: {
@@ -288,8 +275,7 @@ export const MCP_ENTRIES_OFFICIAL: MCPRegistryEntry[] = [
   {
     name: 'supabase',
     title: 'Supabase',
-    description:
-      "This project follows the Model Context Protocol standard, allowing AI assistants to interact with Supabase's API.",
+    description: "该项目遵循 MCP 标准，使 AI 助手能够与 Supabase 的 API 进行交互。",
     icon: 'https://svgl.app/library/supabase.svg',
     homepage: 'https://supabase.com/docs/guides/getting-started/mcp',
     configuration: {
@@ -300,8 +286,7 @@ export const MCP_ENTRIES_OFFICIAL: MCPRegistryEntry[] = [
   {
     name: 'tavily',
     title: 'Tavily',
-    description:
-      "This project follows the Model Context Protocol standard, allowing AI assistants to interact with Tavily's API.",
+    description: "该项目遵循 MCP 标准，使 AI 助手能够与 Tavily 的 API 进行交互。",
     icon: getIcon('tavily.png'),
     homepage: 'https://github.com/tavily-ai/tavily-mcp',
     configuration: {
@@ -315,8 +300,7 @@ export const MCP_ENTRIES_OFFICIAL: MCPRegistryEntry[] = [
   {
     name: 'xero',
     title: 'Xero',
-    description:
-      "This is a Model Context Protocol (MCP) server implementation for Xero. It provides a bridge between the MCP protocol and Xero's API, allowing for standardized access to Xero's accounting and business features.",
+    description: "这是一个面向 Xero 的 MCP 服务器实现。它在 MCP 协议与 Xero 的 API 之间架起桥梁，从而能够以标准化的方式访问 Xero 的会计和业务功能。",
     icon: getIcon('xero.png'),
     homepage: 'https://github.com/XeroAPI/xero-mcp-server',
     configuration: {
@@ -331,8 +315,7 @@ export const MCP_ENTRIES_OFFICIAL: MCPRegistryEntry[] = [
   {
     name: 'firecrawl',
     title: 'Firecrawl',
-    description:
-      'A Model Context Protocol (MCP) server implementation that integrates with Firecrawl for web scraping capabilities.',
+    description: '一个与 Firecrawl 集成的 MCP 服务器实现，提供网页抓取能力。',
     icon: '🔥',
     homepage: 'https://github.com/mendableai/firecrawl-mcp-server',
     configuration: {
@@ -346,8 +329,7 @@ export const MCP_ENTRIES_OFFICIAL: MCPRegistryEntry[] = [
   {
     name: 'playwright',
     title: 'Playwright',
-    description:
-      'A Model Context Protocol server that provides browser automation capabilities using Playwright. This server enables LLMs to interact with web pages through structured accessibility snapshots, bypassing the need for screenshots or visually-tuned models.',
+    description: '一个基于 Playwright 提供浏览器自动化能力的 MCP 服务器。该服务器使LLM能够通过结构化的无障碍快照与网页交互，无需依赖截图或视觉调优模型。',
     icon: 'https://playwright.dev/img/playwright-logo.svg',
     homepage: 'https://github.com/microsoft/playwright-mcp',
     configuration: {
@@ -358,8 +340,7 @@ export const MCP_ENTRIES_OFFICIAL: MCPRegistryEntry[] = [
   {
     name: 'notion',
     title: 'Notion',
-    description:
-      'The Notion MCP Server is a Model Context Protocol (MCP) server that provides seamless integration with Notion APIs, enabling advanced automation and interaction capabilities for developers and tools.',
+    description: 'Notion MCP Server 是一个 MCP 服务器，可与 Notion API 无缝集成，为开发者和工具提供高级自动化与交互能力。',
     icon: 'https://svgl.app/library/notion.svg',
     homepage: 'https://github.com/makenotion/notion-mcp-server',
     configuration: {
@@ -373,8 +354,7 @@ export const MCP_ENTRIES_OFFICIAL: MCPRegistryEntry[] = [
   {
     name: 'pydantic-run-python',
     title: 'Pydantic Run Python',
-    description:
-      'The MCP Run Python package is an MCP server that allows agents to execute Python code in a secure, sandboxed environment. It uses Pyodide to run Python code in a JavaScript environment with Deno, isolating execution from the host system.',
+    description: 'MCP Run Python 包是一个 MCP 服务器，允许智能体在安全的沙箱环境中执行 Python 代码。它借助 Pyodide 在 Deno 的 JavaScript 环境中运行 Python 代码，使代码执行与宿主系统相互隔离。',
     icon: getIcon('pydantic.png'),
     homepage: 'https://ai.pydantic.dev/mcp/run-python/',
     configuration: {
@@ -393,8 +373,7 @@ export const MCP_ENTRIES_OFFICIAL: MCPRegistryEntry[] = [
   {
     name: 'pydantic-logfire',
     title: 'Pydantic Logfire',
-    description:
-      "This repository contains a Model Context Protocol (MCP) server with tools that can access the OpenTelemetry traces and metrics you've sent to Logfire.\n\nThis MCP server enables LLMs to retrieve your application's telemetry data, analyze distributed traces, and make use of the results of arbitrary SQL queries executed using the Logfire APIs.",
+    description: "该仓库包含一个 MCP 服务器，其中的工具可以访问你发送到 Logfire 的 OpenTelemetry 链路追踪与指标数据。\n\n该 MCP 服务器使LLM能够检索应用程序的遥测数据、分析分布式链路追踪，并利用通过 Logfire API 执行的任意 SQL 查询结果。",
     icon: getIcon('pydantic.png'),
     homepage: 'https://github.com/pydantic/logfire-mcp',
     configuration: {
@@ -405,7 +384,7 @@ export const MCP_ENTRIES_OFFICIAL: MCPRegistryEntry[] = [
   {
     name: 'polar',
     title: 'Polar',
-    description: 'Extend the capabilities of your AI Agents with Polar as MCP Server',
+    description: '将 Polar 用作 MCP 服务器，扩展你的 AI 智能体的能力',
     icon: getIcon('polar.png'),
     homepage: 'https://docs.polar.sh/integrate/mcp',
     configuration: {
@@ -416,8 +395,7 @@ export const MCP_ENTRIES_OFFICIAL: MCPRegistryEntry[] = [
   {
     name: 'elevenlabs',
     title: 'ElevenLabs',
-    description:
-      'Official ElevenLabs Model Context Protocol (MCP) server that enables interaction with powerful Text to Speech and audio processing APIs. This server allows MCP clients like Claude Desktop, Cursor, Windsurf, OpenAI Agents and others to generate speech, clone voices, transcribe audio, and more.',
+    description: 'ElevenLabs 官方 MCP 服务器，支持与强大的文本转语音和音频处理 API 进行交互。该服务器使 Claude Desktop、Cursor、Windsurf、OpenAI Agents 等 MCP 客户端能够生成语音、克隆声音、转录音频等。',
     icon: getIcon('elevenlabs.png'),
     homepage: 'https://github.com/elevenlabs/elevenlabs-mcp',
     configuration: {
@@ -434,8 +412,7 @@ export const MCP_ENTRIES_COMMUNITY: MCPRegistryEntry[] = [
   {
     name: 'talk-to-figma',
     title: 'Talk to Figma',
-    description:
-      'This project implements a Model Context Protocol (MCP) integration between Cursor AI and Figma, allowing Cursor to communicate with Figma for reading designs and modifying them programmatically.',
+    description: '该项目实现了 Cursor AI 与 Figma 之间的 MCP 集成，使 Cursor 能够与 Figma 通信，从而读取设计并以编程方式进行修改。',
     icon: 'https://svgl.app/library/figma.svg',
     homepage: 'https://github.com/sonnylazuardi/cursor-talk-to-figma-mcp',
     configuration: {
@@ -446,7 +423,7 @@ export const MCP_ENTRIES_COMMUNITY: MCPRegistryEntry[] = [
   {
     name: 'airbnb',
     title: 'Airbnb',
-    description: 'MCP Server for searching Airbnb and get listing details.',
+    description: '用于搜索 Airbnb 并获取房源详情的 MCP 服务器。',
     icon: 'https://svgl.app/library/airbnb.svg',
     homepage: 'https://github.com/openbnb-org/mcp-server-airbnb',
     configuration: {
@@ -457,8 +434,7 @@ export const MCP_ENTRIES_COMMUNITY: MCPRegistryEntry[] = [
   {
     name: 'airtable',
     title: 'Airtable',
-    description:
-      'A Model Context Protocol server that provides read and write access to Airtable databases. This server enables LLMs to inspect database schemas, then read and write records.',
+    description: '提供 Airtable 数据库读写访问能力的 MCP 服务器。该服务器使LLM能够先检查数据库结构，再读取和写入记录。',
     icon: getIcon('airtable.png'),
     homepage: 'https://github.com/domdomegg/airtable-mcp-server',
     configuration: {
@@ -472,8 +448,7 @@ export const MCP_ENTRIES_COMMUNITY: MCPRegistryEntry[] = [
   {
     name: 'apple-script',
     title: 'Apple Script',
-    description:
-      'A Model Context Protocol (MCP) server that lets you run AppleScript code to interact with Mac. This MCP is intentionally designed to be simple, straightforward, intuitive, and require minimal setup.',
+    description: '一个 MCP 服务器，让你能够运行 AppleScript 代码与 Mac 进行交互。该 MCP 刻意采用简单、直接、直观的设计，只需最少的配置即可使用。',
     icon: getIcon('applescript.png'),
     homepage: 'https://github.com/peakmojo/applescript-mcp',
     configuration: {
@@ -484,8 +459,7 @@ export const MCP_ENTRIES_COMMUNITY: MCPRegistryEntry[] = [
   {
     name: 'basic-memory',
     title: 'Basic Memory',
-    description:
-      'Basic Memory lets you build persistent knowledge through natural conversations with Large Language Models (LLMs) like Claude, while keeping everything in simple Markdown files on your computer. It uses the Model Context Protocol (MCP) to enable any compatible LLM to read and write to your local knowledge base.',
+    description: 'Basic Memory 让你通过与 Claude 等 LLM 进行自然对话来构建持久化知识，同时将所有内容以简单的 Markdown 文件形式保存在你的电脑上。它使用 MCP 协议，使任何兼容的 LLM 都能读写你的本地知识库。',
     icon: 'memory.svg',
     homepage: 'https://github.com/basicmachines-co/basic-memory',
     configuration: {
@@ -496,8 +470,7 @@ export const MCP_ENTRIES_COMMUNITY: MCPRegistryEntry[] = [
   {
     name: 'big-query',
     title: 'BigQuery',
-    description:
-      'A Model Context Protocol server that provides access to BigQuery. This server enables LLMs to inspect database schemas and execute queries.',
+    description: '提供 BigQuery 访问能力的 MCP 服务器。该服务器使LLM能够检查数据库结构并执行查询。',
     icon: getIcon('bigquery.png'),
     homepage: 'https://github.com/LucasHild/mcp-server-bigquery',
     configuration: {
@@ -508,8 +481,7 @@ export const MCP_ENTRIES_COMMUNITY: MCPRegistryEntry[] = [
   {
     name: 'clickup',
     title: 'ClickUp',
-    description:
-      'A Model Context Protocol (MCP) server for integrating ClickUp tasks with AI applications. This server allows AI agents to interact with ClickUp tasks, spaces, lists, and folders through a standardized protocol.',
+    description: '一个用于将 ClickUp 任务与 AI 应用集成的 MCP 服务器。该服务器使 AI 智能体能够通过标准化协议与 ClickUp 的任务、空间、列表和文件夹进行交互。',
     icon: getIcon('clickup.png'),
     homepage: 'https://github.com/TaazKareem/clickup-mcp-server',
     configuration: {
@@ -525,8 +497,7 @@ export const MCP_ENTRIES_COMMUNITY: MCPRegistryEntry[] = [
   {
     name: 'discord',
     title: 'Discord',
-    description:
-      'A Model Context Protocol (MCP) server for the Discord API (JDA), allowing seamless integration of Discord Bot with MCP-compatible applications like Claude Desktop. Enable your AI assistants to seamlessly interact with Discord. Manage channels, send messages, and retrieve server information effortlessly. Enhance your Discord experience with powerful automation capabilities.',
+    description: '一个面向 Discord API (JDA) 的 MCP 服务器，使 Discord Bot 能够与 Claude Desktop 等兼容 MCP 的应用无缝集成。让你的 AI 助手顺畅地与 Discord 交互，轻松管理频道、发送消息和获取服务器信息，并以强大的自动化能力提升你的 Discord 使用体验。',
     icon: 'https://svgl.app/library/discord.svg',
     homepage: 'https://github.com/SaseQ/discord-mcp',
     configuration: {
@@ -540,7 +511,7 @@ export const MCP_ENTRIES_COMMUNITY: MCPRegistryEntry[] = [
   {
     name: 'firebase',
     title: 'Firebase',
-    description: 'Firebase MCP enables AI assistants to work directly with Firebase services.',
+    description: 'Firebase MCP 使 AI 助手能够直接使用 Firebase 服务。',
     icon: 'https://svgl.app/library/firebase.svg',
     homepage: 'https://github.com/gannonh/firebase-mcp',
     configuration: {
@@ -555,8 +526,7 @@ export const MCP_ENTRIES_COMMUNITY: MCPRegistryEntry[] = [
   {
     name: 'ghost',
     title: 'Ghost',
-    description:
-      'A Model Context Protocol (MCP) server for interacting with Ghost CMS through LLM interfaces like Claude. This server provides secure and comprehensive access to your Ghost blog, leveraging JWT authentication and a rich set of MCP tools for managing posts, users, members, tiers, offers, and newsletters.',
+    description: '一个 MCP 服务器，用于通过 Claude 等 LLM 界面与 Ghost CMS 进行交互。该服务器借助 JWT 身份验证和一整套丰富的 MCP 工具，为你的 Ghost 博客提供安全而全面的访问能力，支持管理文章、用户、会员、订阅等级、优惠和邮件通讯。',
     icon: getIcon('ghost.png'),
     homepage: 'https://github.com/MFYDev/ghost-mcp',
     configuration: {
@@ -572,7 +542,7 @@ export const MCP_ENTRIES_COMMUNITY: MCPRegistryEntry[] = [
   {
     name: 'iterm',
     title: 'iTerm',
-    description: 'A Model Context Protocol server that provides access to your iTerm session.',
+    description: '提供 iTerm 会话访问能力的 MCP 服务器。',
     icon: getIcon('iterm.png'),
     homepage: 'https://github.com/ferrislucas/iterm-mcp',
     configuration: {
@@ -583,8 +553,7 @@ export const MCP_ENTRIES_COMMUNITY: MCPRegistryEntry[] = [
   {
     name: 'lightdash',
     title: 'Lightdash',
-    description:
-      "This server provides MCP-compatible access to Lightdash's API, allowing AI assistants to interact with your Lightdash data through a standardized interface.",
+    description: "该服务器提供与 MCP 兼容的 Lightdash API 访问能力，使 AI 助手能够通过标准化接口与你的 Lightdash 数据进行交互。",
     icon: getIcon('lightdash.png'),
     homepage: 'https://github.com/syucream/lightdash-mcp-server',
     configuration: {
@@ -599,8 +568,7 @@ export const MCP_ENTRIES_COMMUNITY: MCPRegistryEntry[] = [
   {
     name: 'monday',
     title: 'Monday',
-    description:
-      'MCP Server for monday.com, enabling MCP clients to interact with Monday.com boards, items, updates, and documents.',
+    description: '面向 monday.com 的 MCP 服务器，使 MCP 客户端能够与 Monday.com 的看板、条目、更新和文档进行交互。',
     icon: getIcon('monday.png'),
     homepage: 'https://github.com/sakce/mcp-server-monday',
     configuration: {
