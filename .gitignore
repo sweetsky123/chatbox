@@ -212,3 +212,7 @@ tmp_*.*
 # Capacitor native projects are scaffolded at build time (scripts/build-android.cjs)
 android/
 ios/
+
+# Local tooling leftovers (not project content)
+.zcodeignore
+smoke/
