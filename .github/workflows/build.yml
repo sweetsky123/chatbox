@@ -189,7 +189,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends libfuse2 xvfb
-          appimage=$(ls release/build/Chatbox-*-x64.AppImage | head -n 1)
+          appimage=$(ls release/build/Chatbox-*-x86_64.AppImage | head -n 1)
           chmod +x "$appimage"
           APPIMAGE_EXTRACT_AND_RUN=1 xvfb-run -a "$appimage" --no-sandbox &
           sleep 25
@@ -228,7 +228,7 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 17
+          java-version: 21
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Generate mobile worker and routes
