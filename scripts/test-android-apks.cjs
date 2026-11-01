@@ -42,7 +42,11 @@ function main() {
     if (!info.includes(`package: name='${PACKAGE}'`)) {
       throw new Error(`${file}: wrong package id:\n${info.split('\n')[0]}`)
     }
-    const nativeCode = [...info.matchAll(/native-code: '([^']+)'/g)].map((m) => m[1])
+    // badging prints native-code as one line with comma-separated quoted
+    // values, e.g.  native-code: 'arm64-v8a', 'armeabi-v7a'
+    const nativeCode = [...info.matchAll(/native-code:([^\n]*)/g)].flatMap((m) =>
+      [...m[1].matchAll(/'([^']+)'/g)].map((x) => x[1])
+    )
     const universal = file === 'app-universal-release.apk'
     if (universal && nativeCode.length < ALL_ABIS.length) {
       throw new Error(`${file}: universal APK misses ABIs: ${nativeCode.join(', ')}`)
