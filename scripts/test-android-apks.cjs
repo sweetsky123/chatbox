@@ -33,7 +33,8 @@ function main() {
   console.log('APKs:', apks.join(', '))
   if (!apks.length) throw new Error('no APKs found')
 
-  const expected = new Set([...ALL_ABIS.map((abi) => `Chatbox-${abi}.apk`), 'Chatbox-universal.apk'])
+  // Gradle ABI splits output app-<abi>-release.apk plus app-universal-release.apk.
+  const expected = new Set([...ALL_ABIS.map((abi) => `app-${abi}-release.apk`), 'app-universal-release.apk'])
   for (const file of apks) {
     if (!expected.has(file)) throw new Error(`unexpected APK name: ${file}`)
     expected.delete(file)
@@ -42,12 +43,12 @@ function main() {
       throw new Error(`${file}: wrong package id:\n${info.split('\n')[0]}`)
     }
     const nativeCode = [...info.matchAll(/native-code: '([^']+)'/g)].map((m) => m[1])
-    const universal = file === 'Chatbox-universal.apk'
+    const universal = file === 'app-universal-release.apk'
     if (universal && nativeCode.length < ALL_ABIS.length) {
       throw new Error(`${file}: universal APK misses ABIs: ${nativeCode.join(', ')}`)
     }
     if (!universal) {
-      const abi = file.replace(/^Chatbox-|\.apk$/g, '')
+      const abi = file.replace(/^app-|-release\.apk$/g, '')
       if (!nativeCode.includes(abi)) {
         throw new Error(`${file}: split APK does not carry ${abi} (has ${nativeCode.join(', ')})`)
       }

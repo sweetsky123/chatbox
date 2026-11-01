@@ -12,12 +12,13 @@ const sourceDir = path.join(repoRoot, 'android', 'app', 'build', 'outputs', 'apk
 const targetDir = path.join(repoRoot, 'release', 'build', 'android')
 
 const version = JSON.parse(fs.readFileSync(path.join(repoRoot, 'release', 'app', 'package.json'), 'utf8')).version
+// Gradle ABI splits output app-<abi>-release.apk plus app-universal-release.apk.
 const RENAMES = {
-  'Chatbox-universal.apk': `Chatbox-${version}-universal.apk`,
-  'Chatbox-arm64-v8a.apk': `Chatbox-${version}-arm64-v8a.apk`,
-  'Chatbox-armeabi-v7a.apk': `Chatbox-${version}-armeabi-v7a.apk`,
-  'Chatbox-x86.apk': `Chatbox-${version}-x86.apk`,
-  'Chatbox-x86_64.apk': `Chatbox-${version}-x86_64.apk`,
+  'app-universal-release.apk': `Chatbox-${version}-universal.apk`,
+  'app-arm64-v8a-release.apk': `Chatbox-${version}-arm64-v8a.apk`,
+  'app-armeabi-v7a-release.apk': `Chatbox-${version}-armeabi-v7a.apk`,
+  'app-x86-release.apk': `Chatbox-${version}-x86.apk`,
+  'app-x86_64-release.apk': `Chatbox-${version}-x86_64.apk`,
 }
 
 fs.mkdirSync(targetDir, { recursive: true })
