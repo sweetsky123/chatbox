@@ -86,6 +86,11 @@ function useProviderPickerGroups({
 
     return [
       {
+        group: String(t('Custom Additions')),
+        actions: quickActions,
+      },
+
+      {
         group: String(t('Popular')),
         actions: featured.map((p) => ({
           id: `provider-${p.id}`,
@@ -97,6 +102,7 @@ function useProviderPickerGroups({
           leftSection: <ProviderIconImage providerId={p.id} size={24} />,
         })),
       },
+
       {
         group: String(t('More Providers')),
         actions: others.map((p) => ({
@@ -109,10 +115,7 @@ function useProviderPickerGroups({
           leftSection: <ProviderIconImage providerId={p.id} size={24} />,
         })),
       },
-      {
-        group: String(t('Custom Additions')),
-        actions: quickActions,
-      },
+
     ]
   }, [allSystemProviders, onSelectProvider, onAddCustomProvider, onImportProvider, isImporting, t])
 }
