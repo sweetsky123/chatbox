@@ -15,16 +15,16 @@
 </p>
 
 <p align="center">
-<a href="https://github.com/chatboxai/chatbox/releases" target="_blank">
+<a href="https://github.com/sweetsky123/chatbox/releases" target="_blank">
 <img alt="macOS" src="https://img.shields.io/badge/-macOS-black?style=flat-square&logo=apple&logoColor=white" />
 </a>
-<a href="https://github.com/chatboxai/chatbox/releases" target="_blank">
+<a href="https://github.com/sweetsky123/chatbox/releases" target="_blank">
 <img alt="Windows" src="https://img.shields.io/badge/-Windows-blue?style=flat-square&logo=windows&logoColor=white" />
 </a>
-<a href="https://github.com/chatboxai/chatbox/releases" target="_blank">
+<a href="https://github.com/sweetsky123/chatbox/releases" target="_blank">
 <img alt="Linux" src="https://img.shields.io/badge/-Linux-yellow?style=flat-square&logo=linux&logoColor=white" />
 </a>
-<a href="https://github.com/chatboxai/chatbox/releases" target="_blank">
+<a href="https://github.com/sweetsky123/chatbox/releases" target="_blank">
 <img alt="Downloads" src="https://img.shields.io/github/downloads/chatboxai/chatbox/total.svg?style=flat" />
 </a>
 <a href="#features">
@@ -50,7 +50,7 @@
 
 This is the repository for the Chatbox Community Edition, open-sourced under the GPLv3 license.
 
-[Chatbox is going open-source Again!](https://github.com/chatboxai/chatbox/issues/2266)
+[Chatbox is going open-source Again!](https://github.com/sweetsky123/chatbox/issues/2266)
 
 We regularly sync code from the pro repo to this repo, and vice versa.
 
@@ -120,7 +120,7 @@ For more information: [chatboxai.app](https://chatboxai.app/)
 ## Quick Start
 
 ### For End Users
-1. Download the appropriate installer for your platform from the [releases page](https://github.com/chatboxai/chatbox/releases)
+1. Download the appropriate installer for your platform from the [releases page](https://github.com/sweetsky123/chatbox/releases)
 2. Install and launch Chatbox
 3. Configure your AI provider (OpenAI, Claude, etc.) in settings
 4. Start chatting!
@@ -225,7 +225,7 @@ For more information: [chatboxai.app](https://chatboxai.app/)
 We welcome contributions from the community! Here's how you can help make Chatbox better:
 
 ### 🐛 Reporting Issues
-- Use [GitHub Issues](https://github.com/chatboxai/chatbox/issues) to report bugs or request features
+- Use [GitHub Issues](https://github.com/sweetsky123/chatbox/issues) to report bugs or request features
 - Before creating a new issue, please search existing issues to avoid duplicates
 - Provide detailed information including steps to reproduce, expected behavior, and screenshots if applicable
 
@@ -250,7 +250,7 @@ Help make Chatbox accessible to more people by contributing translations:
 ### 🌟 Other Ways to Contribute
 - Star the repository to show your support
 - Share Chatbox with others
-- Answer questions in [GitHub Discussions](https://github.com/chatboxai/chatbox/discussions)
+- Answer questions in [GitHub Discussions](https://github.com/sweetsky123/chatbox/discussions)
 - Provide feedback and suggestions
 
 **Thank you for contributing! 🙏**
@@ -269,7 +269,7 @@ Before you begin, ensure you have the following installed:
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/chatboxai/chatbox.git
+   git clone https://github.com/sweetsky123/chatbox.git
    cd chatbox
    ```
 

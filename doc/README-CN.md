@@ -5,7 +5,7 @@
 
 这里是 Chatbox 社区版的代码仓库，以 GPLv3 许可证开源。
 
-[Chatbox 再次开源！](https://github.com/chatboxai/chatbox/issues/2266)
+[Chatbox 再次开源！](https://github.com/sweetsky123/chatbox/issues/2266)
 
 我们定期从专业版仓库同步代码到这个仓库，反之亦然。
 
@@ -85,16 +85,16 @@
 </p>
 
 <p align="center">
-<a href="https://github.com/chatboxai/chatbox/releases" target="_blank">
+<a href="https://github.com/sweetsky123/chatbox/releases" target="_blank">
 <img alt="macOS" src="https://img.shields.io/badge/-macOS-black?style=flat-square&logo=apple&logoColor=white" />
 </a>
-<a href="https://github.com/chatboxai/chatbox/releases" target="_blank">
+<a href="https://github.com/sweetsky123/chatbox/releases" target="_blank">
 <img alt="Windows" src="https://img.shields.io/badge/-Windows-blue?style=flat-square&logo=windows&logoColor=white" />
 </a>
-<a href="https://github.com/chatboxai/chatbox/releases" target="_blank">
+<a href="https://github.com/sweetsky123/chatbox/releases" target="_blank">
 <img alt="Linux" src="https://img.shields.io/badge/-Linux-yellow?style=flat-square&logo=linux&logoColor=white" />
 </a>
-<a href="https://github.com/chatboxai/chatbox/releases" target="_blank">
+<a href="https://github.com/sweetsky123/chatbox/releases" target="_blank">
 <img alt="下载量" src="https://img.shields.io/github/downloads/chatboxai/chatbox/total.svg?style=flat" />
 </a>
 <a href="https://twitter.com/benn_huang" target="_blank">
@@ -195,7 +195,7 @@
 1. 从 Github 克隆仓库
 
 ```bash
-git clone https://github.com/chatboxai/chatbox.git
+git clone https://github.com/sweetsky123/chatbox.git
 ```
 
 2. 安装所需的依赖

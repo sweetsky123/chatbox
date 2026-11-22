@@ -85,7 +85,7 @@ function RouteComponent() {
             <ListItem
               icon={<BrandGithub className="w-full h-full" />}
               title={t('Github')}
-              link="https://github.com/chatboxai/chatbox"
+              link="https://github.com/sweetsky123/chatbox"
               value="chatbox"
             />
             {/* <ListItem
